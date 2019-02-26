@@ -3,7 +3,7 @@ class Movie:
     movie_name = ''
     url = ''
     year = 1900
-    gross = ''
+    gross = 0
     actorList = []
 
     def __init__(self, movie_name, url, year):
@@ -11,7 +11,7 @@ class Movie:
         self.movie_name = movie_name
         self.url = url
         self.year = year
-        self.gross = ''
+        self.gross = 0
         self.actorList = []
 
     def set_id(self, id):

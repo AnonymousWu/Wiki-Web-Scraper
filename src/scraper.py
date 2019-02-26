@@ -95,6 +95,7 @@ def get_movie_from_filmography(url, urlQueue):
         new_movie = movie.Movie(link.get('title'), film_url, film_year)
         film_gross = get_movie_gross(film_url)
         new_movie.set_gross(film_gross)
+        print(new_movie.gross)
         movies.append(new_movie)
         # get the actor information for each film
         urlQueue.append(film_url)
@@ -181,21 +182,43 @@ def get_movie_gross(url):
     soup = read_url(url)
     if not soup:
         logging.warning('cannot open the url')
-        return ''
+        return 0
     table = soup.find("table", {"class": "infobox vevent"})
     if not table:
         logging.info("Soup find Error: cannot find info box.")
-        return ''
-    gross = ''
+        return 0
+    box_office = ''
     for item in table.find_all('tr'):
         if not item:
             logging.warning("cannot find table")
             return 0
         if item.findAll(string=re.compile("Box office")):
-            gross = item.find("td").text
-            if "[" in gross:
-                return gross[0: gross.index("[")]
+            box_office = item.find("td").text
+            if "[" in box_office:
+                box_office = box_office[0: box_office.index("[")]
+
+    # convert string to int
+    gross = 0
+    if box_office != '':
+        gross = string_to_int(box_office)
     return gross
+
+
+def string_to_int(string):
+    data = re.sub(r'[(\xc2|\xa0|+|=|:|$|,)]', '', string)
+    if not data:
+        return 0
+    number = float(re.findall(r'([\d\.\d]+)', data)[0])
+    if not number:
+        return 0
+    if 'billion' in data:
+        return int(number * 1000000000)
+    elif 'million' in data:
+        return int(number * 1000000)
+    elif 'thousand' in data:
+        return int(number * 1000)
+
+    return number
 
 
 def get_filmography_from_actor(url, urlQueue):
