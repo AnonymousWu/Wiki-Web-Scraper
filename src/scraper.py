@@ -38,7 +38,7 @@ def is_filmography_page(url):
     return True
 
 
-def is_film_page(url):
+def is_movie_page(url):
     soup = read_url(url)
     if not soup:
         logging.warning("cannot open current url: " + wiki + url)
@@ -71,7 +71,7 @@ def is_actor_page(url):
     return False
 
 
-def get_film_from_filmography(url, urlQueue):
+def get_movie_from_filmography(url, urlQueue):
     soup = read_url(url)
     # find class ‘wikitable sortable’ in the HTML script
     table = soup.find('table', {'class': 'wikitable sortable'})
@@ -93,6 +93,8 @@ def get_film_from_filmography(url, urlQueue):
         film_year = get_movie_year(film_url)
         print(link.get('title'), film_url, film_year)
         new_movie = movie.Movie(link.get('title'), film_url, film_year)
+        film_gross = get_movie_gross(film_url)
+        new_movie.set_gross(film_gross)
         movies.append(new_movie)
         # get the actor information for each film
         urlQueue.append(film_url)
@@ -118,7 +120,7 @@ def get_movie_year(url):
     return 1900
 
 
-def get_actor_from_film(url, urlQueue):
+def get_actor_from_movie(url, urlQueue):
     soup = read_url(url)
     # if not soup:
     #     logging.error('cannot open the url ', wiki+url)
@@ -175,21 +177,25 @@ def get_actor_age(url):
     return int(re.findall(r'\b\d+\b', showAge.text)[0])
 
 
-
-def update_movie_gross(soup, movie):
+def get_movie_gross(url):
+    soup = read_url(url)
+    if not soup:
+        logging.warning('cannot open the url')
+        return ''
     table = soup.find("table", {"class": "infobox vevent"})
     if not table:
         logging.info("Soup find Error: cannot find info box.")
-        return
-    box_office = ''
+        return ''
+    gross = ''
     for item in table.find_all('tr'):
+        if not item:
+            logging.warning("cannot find table")
+            return 0
         if item.findAll(string=re.compile("Box office")):
-            box_office = item.find("td").text
-            if "[" in box_office:
-                box_office = box_office[0: box_office.index("[")]
-                if (movie):
-                    movie.set_gross(box_office)
-            print(box_office)
+            gross = item.find("td").text
+            if "[" in gross:
+                return gross[0: gross.index("[")]
+    return gross
 
 
 def get_filmography_from_actor(url, urlQueue):
@@ -217,12 +223,12 @@ def scrap():
 
         # check if the current url is a movie page or actor page or a filmography page
         if is_filmography_page(curr_url):
-            m = get_film_from_filmography(curr_url, urlQueue)
+            m = get_movie_from_filmography(curr_url, urlQueue)
             movieList.extend(m)
             print("number of movies: ", len(movieList))
 
-        elif is_film_page(curr_url):
-            a = get_actor_from_film(curr_url, urlQueue)
+        elif is_movie_page(curr_url):
+            a = get_actor_from_movie(curr_url, urlQueue)
             actorList.extend(a)
             #print("number of actors: ", len(actorList))
 
