@@ -5,9 +5,10 @@ import time
 import numpy as np
 from collections import deque
 import re
-from src import movie, actor
+from src import movie, actor, graph, JSON
+import json
 
-wiki = 'https://en.wikipedia.org/'
+wiki = 'https://en.wikipedia.org'
 
 
 def read_url(url):
@@ -71,7 +72,7 @@ def is_actor_page(url):
     return False
 
 
-def get_movie_from_filmography(url, urlQueue):
+def get_movie_from_filmography(url, urlQueue, g):
     soup = read_url(url)
     # find class ‘wikitable sortable’ in the HTML script
     table = soup.find('table', {'class': 'wikitable sortable'})
@@ -90,12 +91,12 @@ def get_movie_from_filmography(url, urlQueue):
     movies = []
     for link in links:
         film_url = link.get('href')
-        film_year = get_movie_year(film_url)
-        print(link.get('title'), film_url, film_year)
-        new_movie = movie.Movie(link.get('title'), film_url, film_year)
-        film_gross = get_movie_gross(film_url)
-        new_movie.set_gross(film_gross)
-        print(new_movie.gross)
+        new_movie = movie.Movie(wiki+film_url)
+        new_movie.set_name(link.get('title'))
+        new_movie.set_year(get_movie_year(film_url))
+        new_movie.set_gross(get_movie_gross(film_url))
+        print(new_movie.movie_name, new_movie.year, new_movie.gross)
+        g.add_movie(new_movie)
         movies.append(new_movie)
         # get the actor information for each film
         urlQueue.append(film_url)
@@ -110,7 +111,7 @@ def get_movie_year(url):
         return 1900
     year = soup.find('span', {'class': 'bday dtstart published updated'})
     if year:
-        return year.get_text()[:4]
+        return int(year.get_text()[:4])
     else:
         title = soup.title.get_text()
         for string in title.split():
@@ -121,11 +122,17 @@ def get_movie_year(url):
     return 1900
 
 
-def get_actor_from_movie(url, urlQueue):
+def get_actor_from_movie(url, urlQueue, g):
+
+    if wiki+url not in g.movies.keys():
+        g.movies[wiki+url] = movie.Movie(wiki+url)
+        g.movies[wiki+url].set_gross(get_movie_gross(url))
+        g.movies[wiki+url].set_year(get_movie_year(url))
+
     soup = read_url(url)
-    # if not soup:
-    #     logging.error('cannot open the url ', wiki+url)
-    #     return
+    if not soup:
+        logging.error('cannot open the url ', wiki+url)
+        return
     cast = soup.find_all('span', {'id': ['Cast']})
     if not cast:
         logging.warning('Soup find_all Warning: cannot find any cast information')
@@ -139,10 +146,12 @@ def get_actor_from_movie(url, urlQueue):
     actors = []
     for link in cast_link:
         actor_url = link.get('href')
-        print(actor_url)
-        actor_age = get_actor_age(actor_url)
-        print(actor_age)
-        new_actor = actor.Actor(link.get('title'), actor_url, actor_age)
+        new_actor = actor.Actor(wiki+actor_url)
+        new_actor.set_name(link.get('title'))
+        new_actor.set_age(get_actor_age(actor_url))
+        g.add_actor(new_actor)
+        print(new_actor.actor_name, new_actor.age)
+        g.movies[wiki+url].add_actor(new_actor)   # add actor to movie
         actors.append(new_actor)
         urlQueue.append(actor_url)
 
@@ -231,13 +240,12 @@ def get_filmography_from_actor(url, urlQueue):
 
 
 def scrap():
+    g = graph.Graph()
     actorList = []
     movieList = []
     urlQueue = deque(['/wiki/Christopher_Lee_filmography'])  # start with this wiki page
 
-    while len(movieList) < 10 or len(actorList) < 250:
-    #while len(movieList) < 125:
-
+    while len(movieList) < 125 or len(actorList) < 250:
         if not urlQueue:
             urlQueue.append('/wiki/Michael_Caine_filmography')  # add a new start page
 
@@ -246,21 +254,45 @@ def scrap():
 
         # check if the current url is a movie page or actor page or a filmography page
         if is_filmography_page(curr_url):
-            m = get_movie_from_filmography(curr_url, urlQueue)
+            m = get_movie_from_filmography(curr_url, urlQueue, g)
+            # for item in m:
+            #     if item not in g.movies:
+            #         g.add_movie(item)
             movieList.extend(m)
             print("number of movies: ", len(movieList))
 
         elif is_movie_page(curr_url):
-            a = get_actor_from_movie(curr_url, urlQueue)
+            a = get_actor_from_movie(curr_url, urlQueue, g)
+            # for item in a:
+            #     if item not in g.actors:
+            #         g.add_actor(item)
             actorList.extend(a)
-            #print("number of actors: ", len(actorList))
+    #        print("number of actors: ", len(actorList))
 
         elif is_actor_page(curr_url):
             get_filmography_from_actor(curr_url, urlQueue)
 
+    # add links between movies and actors
+    # for a in g.actors.values():
+    #     a.add_to_each_other()
+    # for m in g.movies.values():
+    #     m.add_to_each_other()
+    for m in g.movies.values():
+        for a in g.actors.values():
+            if a in m.actorList:
+                if not g.is_connected(a, m):
+                    g.add_edge(a, m, m.gross)
+                if not g.is_connected(m, a):
+                    g.add_edge(m, a, m.gross)
 
-    print("number of movies: ", len(movieList))
-    print("number of actors: ", len(actorList))
+
+
+    #print("number of movies: ", len(movieList))
+    #print("number of actors: ", len(actorList))
+
+    #JSON.store_to_Json(movieList, actorList, 'data.json')
+    JSON.store_to_Json(g, 'data.json')
+
 
 
 def main():

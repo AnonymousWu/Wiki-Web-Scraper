@@ -1,21 +1,29 @@
+import json
+from src import actor, scraper
+
+
 class Movie:
-    id = -1
+
+    # id = -1
     movie_name = ''
     url = ''
     year = 1900
     gross = 0
-    actorList = []
+    actorList = []    # neighbors
 
-    def __init__(self, movie_name, url, year):
-        self.id = -1
-        self.movie_name = movie_name
+    def __init__(self, url):
+        # self.id = -1
+        self.movie_name = ''
         self.url = url
-        self.year = year
+        self.year = 1900
         self.gross = 0
         self.actorList = []
 
-    def set_id(self, id):
-        self.id = id
+    def set_name(self, name):
+        self.movie_name = name
+
+    def set_year(self, year):
+        self.year = year
 
     def set_gross(self, gross):
         self.gross = gross
@@ -24,11 +32,20 @@ class Movie:
         if new_actor not in self.actorList:
             self.actorList.append(new_actor)
 
+    def add_to_each_other(self):
+        for a in self.actorList:
+            if self not in a.movieList:
+                a.add_movie(self)
+
     def to_json(self):
-        json = {}
-        json['id'] = self.id
-        json['movie_name'] = self.movie_name
-        json['url'] = self.url
-        json['year'] = self.year
-        json['gross'] = self.gross
-        json['actorList'] = self.actorList
+        item = {}
+        # json['id'] = self.id
+        item['movie_name'] = self.movie_name
+        item['url'] = self.url
+        item['year'] = self.year
+        item['gross'] = self.gross
+        item['actorList'] = []
+        for a in self.actorList:
+            item['actorList'].append(a.actor_name)
+
+        return json.loads(json.dumps(item))
