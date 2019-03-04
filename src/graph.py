@@ -71,6 +71,7 @@ class Graph:
             self.actors[v1.url] = v1
             self.movies[v2.url] = v2
 
+
 #  ---------------------------GRAPH QUERIES ------------------------------------- #
 
     # Find how much a movie has grossed

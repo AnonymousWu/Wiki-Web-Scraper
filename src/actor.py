@@ -7,7 +7,7 @@ class Actor:
     actor_name = ''
     url = ''
     age = 0
-    # gross = 0
+    gross = 0
     movieList = []
 
     def __init__(self, url):
@@ -15,7 +15,7 @@ class Actor:
         self.actor_name = ''
         self.url = url
         self.age = 0
-        # self.gross = 0
+        self.gross = 0
         self.movieList = []
 
     def set_name(self, name):
@@ -27,6 +27,9 @@ class Actor:
     def add_movie(self, new_movie):
         if new_movie not in self.movieList:
             self.movieList.append(new_movie)
+
+    def set_gross(self, gross):
+        self.gross = gross
 
     # def update_gross(self, new_movie):
     #     if new_movie not in self.movieList:
@@ -43,7 +46,7 @@ class Actor:
         item['actor_name'] = self.actor_name
         item['url'] = self.url
         item['age'] = self.age
-        # json['gross'] = self.gross
+        item['gross'] = self.gross
         item['movieList'] = []
         for m in self.movieList:
             item['movieList'].append(m.movie_name)

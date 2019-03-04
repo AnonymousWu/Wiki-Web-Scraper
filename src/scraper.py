@@ -287,8 +287,8 @@ def scrap():
 
 
 
-    #print("number of movies: ", len(movieList))
-    #print("number of actors: ", len(actorList))
+    print("number of movies: ", len(movieList))
+    print("number of actors: ", len(actorList))
 
     #JSON.store_to_Json(movieList, actorList, 'data.json')
     JSON.store_to_Json(g, 'data.json')
