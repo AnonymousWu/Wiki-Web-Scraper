@@ -29,13 +29,13 @@ class Movie:
         self.gross = gross
 
     def add_actor(self, new_actor):
-        if new_actor not in self.actorList:
-            self.actorList.append(new_actor)
+        if new_actor.actor_name not in self.actorList:
+            self.actorList.append(new_actor.actor_name)
 
-    def add_to_each_other(self):
-        for a in self.actorList:
-            if self not in a.movieList:
-                a.add_movie(self)
+    # def add_to_each_other(self):
+    #     for a in self.actorList:
+    #         if self.movie_name not in a.movieList:
+    #             a.add_movie(self)
 
     def to_json(self):
         item = {}
@@ -46,6 +46,6 @@ class Movie:
         item['gross'] = self.gross
         item['actorList'] = []
         for a in self.actorList:
-            item['actorList'].append(a.actor_name)
+            item['actorList'].append(a)
 
         return json.loads(json.dumps(item))
