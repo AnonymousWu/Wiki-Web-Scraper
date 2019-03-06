@@ -24,7 +24,7 @@ def store_to_Json(g, file_name):
         json.dump(data, outfile, indent=4)
 
 
-def retrive_from_Json(file):
+def retrieve_from_Json(file):
 
     wiki = 'https://en.wikipedia.org'
 
@@ -115,7 +115,7 @@ def retrive_from_Json(file):
     #         for a in movie_actors:
     #             new_movie.actorList.append(a)
 
-    return g
+    return g, actor_data, movie_data
 
 
 

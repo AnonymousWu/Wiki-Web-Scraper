@@ -55,7 +55,7 @@ class Graph:
         # add an actor to a movie
         if isinstance(v1, movie.Movie) and isinstance(v2, actor.Actor):
             v1.add_actor(v2)
-            #v2.add_movie(v1)
+            v2.add_movie(v1)
             # self.movies[v1].add_neighbor(self.actors[v2], cost)
             self.movies[v1.movie_name] = v1
             self.actors[v2.actor_name] = v2
@@ -66,7 +66,7 @@ class Graph:
             # if v2 not in self.movies:
             #     self.add_movie(v2)
             v1.add_movie(v2)
-            #v2.add_actor(v1)
+            v2.add_actor(v1)
             # self.actors[v1].add_neighbor(self.movies[v2], cost)
             self.actors[v1.actor_name] = v1
             self.movies[v2.movie_name] = v2
