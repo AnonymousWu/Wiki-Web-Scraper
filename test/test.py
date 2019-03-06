@@ -3,7 +3,10 @@ from src import movie
 from src import actor
 from src import graph
 from src import JSON
-import json
+import json, requests
+from src import data_analysis
+from src.web_API import *
+from flask import Flask, jsonify, request
 
 
 class TestGraph(unittest.TestCase):
@@ -139,7 +142,7 @@ class TestQuery(unittest.TestCase):
         g.add_edge(m, a2)
 
         assert g.find_movie_gross(m) == m.gross
-        print(g.list_actor_movies(a1))
+        #(g.list_actor_movies(a1))
         assert g.list_actor_movies(a1) == [m.movie_name]
         assert g.list_actor_movies(a2) == [m.movie_name]
         assert g.list_movie_actors(m) == [a1.actor_name, a2.actor_name]
@@ -291,6 +294,13 @@ class TestJson(unittest.TestCase):
         assert g.movies["The First Deadly Sin"].gross == 0
         assert g.movies["The First Deadly Sin"].year == 1980
 
+    def test_data_analysis(self):
+        g, actor_data, movie_data = JSON.retrieve_from_Json('data.json')
+        assert not data_analysis.find_hub_actors(g, -1)
+        assert data_analysis.find_hub_actors(g, 1)[0][0] == 'Bruce Willis'
+
+        assert not data_analysis.find_most_profitable_age(g, -1)
+        assert data_analysis.find_most_profitable_age(g, 1)[0][0] == 61
 
 
 
