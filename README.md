@@ -1,2 +1,2 @@
-# sp-19-cs242-assignment2
+# Wikipedia Web Scraper 
 
