@@ -1,0 +1,32 @@
+{
+    "Movie": [
+        {
+            "movie_name": "Marie (film)",
+            "url": "https://en.wikipedia.org/wiki/Marie_(film)",
+            "year": 1985,
+            "gross": 3712170,
+            "actorList": [
+                "Sissy Spacek",
+                "Jeff Daniels"
+            ]
+        }
+    ],
+    "Actor": [
+        {
+            "actor_name": "Sissy Spacek",
+            "url": "https://en.wikipedia.org/wiki/Sissy_Spacek",
+            "age": 69,
+            "movieList": [
+                "Marie (film)"
+            ]
+        },
+        {
+            "actor_name": "Jeff Daniels",
+            "url": "https://en.wikipedia.org/wiki/Jeff_Daniels",
+            "age": 64,
+            "movieList": [
+                "Marie (film)"
+            ]
+        }
+    ]
+}
